@@ -1,9 +1,0 @@
-package com.in28minutes.rest.webservices.exception;
-
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;;
-
-public class CustomizedResponseEntityExceptionHandler 
-extends ResponseEntityExceptionHandler {
-
-	
-}

@@ -1,7 +1,0 @@
-package com.in28minutes.rest.webservices.exception;
-
-import ResponseEntityExceptionHandler;
-
-public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
-}
