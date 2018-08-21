@@ -1,0 +1,5 @@
+package com.in28minutes.rest.webservices.usuario;
+
+public class UserNotFoundException extends RuntimeException {
+
+}

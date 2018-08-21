@@ -1,0 +1,9 @@
+package com.in28minutes.rest.webservices.usuario;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class UserDaoService {
+
+	private List<User> users = new ArrayList<>();
+}

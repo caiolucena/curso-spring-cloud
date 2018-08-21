@@ -1,0 +1,616 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+
+<channel>
+	<title>Planet Eclipse</title>
+	<link>http://planeteclipse.org/planet/</link>
+	<language>en</language>
+	<description>Planet Eclipse - http://planeteclipse.org/planet/</description>
+
+<item>
+	<title>Orion: Announcing Orion 19</title>
+	<guid isPermaLink="false">http://planetorion.org/news/?p=913</guid>
+	<link>http://planetorion.org/news/2018/08/announcing-orion-19/</link>
+	<description>&lt;p&gt;We are pleased to announce the nineteenth release of Orion, “Your IDE in the Cloud”. You can run it now at &lt;a href=&quot;https://orionhub.org/&quot;&gt;OrionHub,&lt;/a&gt; from &lt;a href=&quot;https://www.npmjs.com/package/orion&quot;&gt;NPM&lt;/a&gt; or &lt;a href=&quot;http://download.eclipse.org/orion/drops/R-19.0-201808171438/index.html&quot;&gt;download the server&lt;/a&gt; to run your own instance locally.&lt;/p&gt;
+&lt;p&gt;Once again, thank you to all committers and contributors for your hard work this release. There were 11 bugs and enhancements fixed, across &lt;a href=&quot;https://github.com/eclipse/orion.client/compare/R18_0...R19_0&quot;&gt;36 commits&lt;/a&gt; from 5 authors.&lt;/p&gt;
+&lt;p&gt;This release was focussed entirely on accessibility.&lt;/p&gt;</description>
+	<pubDate>Mon, 20 Aug 2018 13:44:19 +0000</pubDate>
+</item>
+<item>
+	<title>vert.x project: The RSS reader tutorial</title>
+	<guid isPermaLink="true">https://vertx.io/blog/the-rss-reader-tutorial</guid>
+	<link>https://vertx.io/blog/the-rss-reader-tutorial</link>
+	<description>&lt;article&gt;&lt;h1 id=&quot;the-rss-reader-tutorial&quot;&gt;The RSS reader tutorial&lt;/h1&gt;
+&lt;p&gt;This tutorial is dedicated for users who’d like to know how to use the Eclipse Vert.x Cassandra client with in practice.&lt;/p&gt;
+&lt;h1 id=&quot;before-you-start-this-tutorial&quot;&gt;Before you start this tutorial&lt;/h1&gt;
+&lt;p&gt;Before starting, you should :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;be familiar with &lt;a href=&quot;https://vertx.io/&quot;&gt;Eclipse Vert.x&lt;/a&gt;. If you are not, here is the &lt;a href=&quot;https://vertx.io/docs/guide-for-java-devs/&quot;&gt;guide for Java developers&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;have some basic understanding of databases. Extended knowledge of Cassandra is not required.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You also may find it useful to read &lt;a href=&quot;https://validator.w3.org/feed/docs/rss2.html&quot;&gt;the RSS 2.0&lt;/a&gt; specification, because the resulted app is, basically, a storage of RSS 2.0 feeds.&lt;/p&gt;
+&lt;p&gt;To give you an idea of what the App is about, here is how it looks like from the fronted side:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;see how it looks&quot; src=&quot;http://vertx.io/assets/blog/the-rss-reader-tutorial/application.png&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;On the image we see that browser space is split into 2 parts:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Saved feed names&lt;/li&gt;
+&lt;li&gt;List of articles for the selected feed&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Here you also can enter a link to a new feed, so the App will fetch and parse the feed.
+After that, it will appear in the left column along with other saved feeds.&lt;/p&gt;
+&lt;h1 id=&quot;requirements&quot;&gt;Requirements&lt;/h1&gt;
+&lt;p&gt;For completing this tutorial you need:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Java 8 or higher&lt;/li&gt;
+&lt;li&gt;Git&lt;/li&gt;
+&lt;li&gt;1 hour of your time&lt;/li&gt;
+&lt;li&gt;You favorite code editor&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For running the example you should ensure that Cassandra service is running locally on port 9042.
+As an option, you can run Cassandra with &lt;a href=&quot;https://github.com/riptano/ccm#installation&quot;&gt;ccm&lt;/a&gt;(Cassandra Cluster Manager).
+Follow &lt;a href=&quot;https://github.com/riptano/ccm#installation&quot;&gt;this&lt;/a&gt; instructions for installing ccm.
+After installing you will be able to run a single node cluster:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs bash&quot;&gt;ccm create rss_reader -v &lt;span class=&quot;hljs-number&quot;&gt;3.11&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;2&lt;/span&gt; -n &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;hljs-operator&quot;&gt;-s&lt;/span&gt;
+ccm start&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For now, &lt;a href=&quot;https://github.com/vert-x3/vertx-cassandra-client&quot;&gt;Eclipse Vert.x Cassandra client&lt;/a&gt; is not available in maven central, it means that you have to build and install it locally:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs bash&quot;&gt;git clone https://github.com/vert-x3/vertx-cassandra-client
+&lt;span class=&quot;hljs-built_in&quot;&gt;cd&lt;/span&gt; vertx-cassandra-client
+mvn clean install -Dmaven.test.skip=&lt;span class=&quot;hljs-literal&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;hljs-operator&quot;&gt;-s&lt;/span&gt; .travis.maven.settings.xml&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before completing this step make sure that you have successfully cloned the RSS reader repository and checked out the &lt;code&gt;step_1&lt;/code&gt; branch:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs bash&quot;&gt;git clone https://github.com/Sammers21/rss-reader
+&lt;span class=&quot;hljs-built_in&quot;&gt;cd&lt;/span&gt; rss-reader
+git checkout step_1&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now you can try to tun this example and see if it works:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs bash&quot;&gt;./gradlew vertxRun&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;schema&quot;&gt;Schema&lt;/h2&gt;
+&lt;p&gt;If you are familiar with &lt;a href=&quot;http://cassandra.apache.org/&quot;&gt;Apache Cassandra&lt;/a&gt; you
+should know that the way your data is stored in Cassandra is dependent on queries
+you are running. It means that you need first to figure out what kind of queries
+you will be running, and then you can produce a storage scheme.&lt;/p&gt;
+&lt;p&gt;In our case we’d like our application to have 3 endpoints:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;POST /user/{user_id}/rss_link - for adding links to a user’s feed&lt;/li&gt;
+&lt;li&gt;GET /user/{user_id}/rss_channels - for retrieving information about RSS channels a user subscribed on&lt;/li&gt;
+&lt;li&gt;GET /articles/by_rss_link?link={rss_link} - for retrieving information about articles on a specific RSS channel&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;For implementing this endpoints the schema should look in this way:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs&quot;&gt;&lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;TABLE&lt;/span&gt; rss_by_user (login &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt; , rss_link &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, &lt;span class=&quot;hljs-keyword&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;KEY&lt;/span&gt; (login, rss_link));&lt;/span&gt;
+&lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;TABLE&lt;/span&gt; articles_by_rss_link(rss_link &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, pubDate &lt;span class=&quot;hljs-keyword&quot;&gt;timestamp&lt;/span&gt;, title &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, article_link &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, description &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, &lt;span class=&quot;hljs-keyword&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;KEY&lt;/span&gt; ( rss_link , pubDate , article_link));&lt;/span&gt;
+&lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;TABLE&lt;/span&gt; channel_info_by_rss_link(rss_link &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, last_fetch_time &lt;span class=&quot;hljs-keyword&quot;&gt;timestamp&lt;/span&gt;,title &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, site_link &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, description &lt;span class=&quot;hljs-built_in&quot;&gt;text&lt;/span&gt;, &lt;span class=&quot;hljs-keyword&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;KEY&lt;/span&gt;(rss_link));&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;what-to-do-in-this-step&quot;&gt;What to do in this step&lt;/h2&gt;
+&lt;p&gt;In this step we will implement only the first endpoint&lt;/p&gt;
+&lt;h2 id=&quot;project-overview&quot;&gt;Project overview&lt;/h2&gt;
+&lt;p&gt;There are two notable classes in the project: &lt;code&gt;AppVerticle&lt;/code&gt; and &lt;code&gt;FetchVerticle&lt;/code&gt;. The first one is a &lt;a href=&quot;https://vertx.io/docs/vertx-core/java/#_verticles&quot;&gt;Verticle&lt;/a&gt; responsible for HTTP request handling and storage schema initialization. The second one is a &lt;a href=&quot;https://vertx.io/docs/vertx-core/java/#_verticles&quot;&gt;Verticle&lt;/a&gt; as well, but responsible for RSS feeds fetching.&lt;/p&gt;
+&lt;p&gt;The idea is simple. When the application is starting the &lt;code&gt;AppVerticle&lt;/code&gt; is deployed, then it tries to initialize storage schema, described in &lt;code&gt;src/main/resources/schema.cql&lt;/code&gt; file by reading it and executing listed queries line by line. After the schema initialization the &lt;code&gt;AppVerticle&lt;/code&gt; deploys &lt;code&gt;FetchVerticle&lt;/code&gt; and starts a HTTP server.&lt;/p&gt;
+&lt;h2 id=&quot;implementing-the-endpoint&quot;&gt;Implementing the endpoint&lt;/h2&gt;
+&lt;p&gt;Now, it is time to implement the first endpoint. Pay attention to &lt;code&gt;TODO&lt;/code&gt;s, they are for pointing you out about where changes should be made.&lt;/p&gt;
+&lt;p&gt;Now, let’s have a look at the &lt;code&gt;AppVerticle#postRssLink&lt;/code&gt; method. This method is called each time the first endpoint is called, so we can figure out what is the posted body and id of the user, who performed the request, directly there. There are 2 main things we want to do in this method:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Notifying via the &lt;a href=&quot;https://vertx.io/docs/vertx-core/java/#event_bus&quot;&gt;Event Bus&lt;/a&gt; the &lt;code&gt;FetchVerticle&lt;/code&gt; to fetch given by user link link to an RSS feed.&lt;/li&gt;
+&lt;li&gt;Inserting an entry to the &lt;code&gt;rss_by_user&lt;/code&gt; table.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This is how the &lt;code&gt;AppVerticle#postRssLink&lt;/code&gt; method should be implemented:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs java&quot;&gt;&lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;postRssLink&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;(RoutingContext ctx)&lt;/span&gt; &lt;/span&gt;{
+    ctx.request().bodyHandler(body -&amp;gt; {
+        JsonObject bodyAsJson = body.toJsonObject();
+        String link = bodyAsJson.getString(&lt;span class=&quot;hljs-string&quot;&gt;&quot;link&quot;&lt;/span&gt;);
+        String userId = ctx.request().getParam(&lt;span class=&quot;hljs-string&quot;&gt;&quot;user_id&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; (link == &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt; || userId == &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;) {
+            responseWithInvalidRequest(ctx);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;else&lt;/span&gt; {
+            vertx.eventBus().send(&lt;span class=&quot;hljs-string&quot;&gt;&quot;fetch.rss.link&quot;&lt;/span&gt;, link);
+            Future future = Future.future();
+            BoundStatement query = insertNewLinkForUser.bind(userId, link);
+            client.execute(query, future);
+            future.setHandler(result -&amp;gt; {
+                &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; (result.succeeded()) {
+                    ctx.response().end(&lt;span class=&quot;hljs-keyword&quot;&gt;new&lt;/span&gt; JsonObject().put(&lt;span class=&quot;hljs-string&quot;&gt;&quot;message&quot;&lt;/span&gt;, &lt;span class=&quot;hljs-string&quot;&gt;&quot;The feed just added&quot;&lt;/span&gt;).toString());
+                } &lt;span class=&quot;hljs-keyword&quot;&gt;else&lt;/span&gt; {
+                    ctx.response().setStatusCode(&lt;span class=&quot;hljs-number&quot;&gt;400&lt;/span&gt;).end(result.cause().getMessage());
+                }
+            });
+        }
+    });
+}
+
+&lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;responseWithInvalidRequest&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;(RoutingContext ctx)&lt;/span&gt; &lt;/span&gt;{
+    ctx.response()
+            .setStatusCode(&lt;span class=&quot;hljs-number&quot;&gt;400&lt;/span&gt;)
+            .putHeader(&lt;span class=&quot;hljs-string&quot;&gt;&quot;content-type&quot;&lt;/span&gt;, &lt;span class=&quot;hljs-string&quot;&gt;&quot;application/json; charset=utf-8&quot;&lt;/span&gt;)
+            .end(invalidRequest().toString());
+}
+
+&lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; JsonObject &lt;span class=&quot;hljs-title&quot;&gt;invalidRequest&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+    &lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;JsonObject&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;()&lt;/span&gt;.&lt;span class=&quot;hljs-title&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;message&quot;&lt;/span&gt;, &lt;span class=&quot;hljs-string&quot;&gt;&quot;Invalid request&quot;&lt;/span&gt;)&lt;/span&gt;&lt;/span&gt;;
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You may notice that &lt;code&gt;insertNewLinkForUser&lt;/code&gt; is a &lt;code&gt;PreparedStatement&lt;/code&gt;, and should be initialized before the &lt;code&gt;AppVerticle&lt;/code&gt; start. Let’s do it in the &lt;code&gt;AppVerticle#prepareNecessaryQueries&lt;/code&gt; method:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs java&quot;&gt;&lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; Future &lt;span class=&quot;hljs-title&quot;&gt;prepareNecessaryQueries&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+    Future insertNewLinkForUserPrepFuture = Future.future();
+    client.prepare(&lt;span class=&quot;hljs-string&quot;&gt;&quot;INSERT INTO rss_by_user (login , rss_link ) VALUES ( ?, ?);&quot;&lt;/span&gt;, insertNewLinkForUserPrepFuture);
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; insertNewLinkForUserPrepFuture.compose(preparedStatement -&amp;gt; {
+        insertNewLinkForUser = preparedStatement;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; Future.succeededFuture();
+    });
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also, we should not forget to fetch a RSS by the link sent to &lt;code&gt;FetchVerticle&lt;/code&gt; via the Event Bus. We can do it in the &lt;code&gt;FetchVerticle#startFetchEventBusConsumer&lt;/code&gt; method:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs java&quot;&gt;vertx.eventBus().localConsumer(&lt;span class=&quot;hljs-string&quot;&gt;&quot;fetch.rss.link&quot;&lt;/span&gt;, message -&amp;gt; {
+    String rssLink = (String) message.body();
+    log.info(&lt;span class=&quot;hljs-string&quot;&gt;&quot;fetching &quot;&lt;/span&gt; + rssLink);
+    webClient.getAbs(rssLink).send(response -&amp;gt; {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; (response.succeeded()) {
+            String bodyAsString = response.result().bodyAsString(&lt;span class=&quot;hljs-string&quot;&gt;&quot;UTF-8&quot;&lt;/span&gt;);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+                RssChannel rssChannel = &lt;span class=&quot;hljs-keyword&quot;&gt;new&lt;/span&gt; RssChannel(bodyAsString);
+
+                BatchStatement batchStatement = &lt;span class=&quot;hljs-keyword&quot;&gt;new&lt;/span&gt; BatchStatement();
+                BoundStatement channelInfoInsertQuery = insertChannelInfo.bind(
+                        rssLink, &lt;span class=&quot;hljs-keyword&quot;&gt;new&lt;/span&gt; Date(System.currentTimeMillis()), rssChannel.description, rssChannel.link, rssChannel.title
+                );
+                batchStatement.add(channelInfoInsertQuery);
+
+                &lt;span class=&quot;hljs-keyword&quot;&gt;for&lt;/span&gt; (Article article : rssChannel.articles) {
+                    batchStatement.add(insertArticleInfo.bind(rssLink, article.pubDate, article.link, article.description, article.title));
+                }
+                Future insertArticlesFuture = Future.future();
+                cassandraClient.execute(batchStatement, insertArticlesFuture);
+
+                insertArticlesFuture.compose(insertDone -&amp;gt; Future.succeededFuture());
+            } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (Exception e) {
+                log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;Unable to fetch: &quot;&lt;/span&gt; + rssLink, e);
+            }
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;else&lt;/span&gt; {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;Unable to fetch: &quot;&lt;/span&gt; + rssLink);
+        }
+    });
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And, finally, this code would not work if &lt;code&gt;insertChannelInfo&lt;/code&gt; and &lt;code&gt;insertArticleInfo&lt;/code&gt; statements will not be initialized at verticle start. Let’s to this in the &lt;code&gt;FetchVerticle#prepareNecessaryQueries&lt;/code&gt; method:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs java&quot;&gt;&lt;span class=&quot;hljs-function&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; Future &lt;span class=&quot;hljs-title&quot;&gt;prepareNecessaryQueries&lt;/span&gt;&lt;span class=&quot;hljs-params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+        Future insertChannelInfoPrepFuture = Future.future();
+        cassandraClient.prepare(&lt;span class=&quot;hljs-string&quot;&gt;&quot;INSERT INTO channel_info_by_rss_link ( rss_link , last_fetch_time, description , site_link , title ) VALUES (?, ?, ?, ?, ?);&quot;&lt;/span&gt;, insertChannelInfoPrepFuture);
+
+        Future insertArticleInfoPrepFuture = Future.future();
+        cassandraClient.prepare(&lt;span class=&quot;hljs-string&quot;&gt;&quot;INSERT INTO articles_by_rss_link ( rss_link , pubdate , article_link , description , title ) VALUES ( ?, ?, ?, ?, ?);&quot;&lt;/span&gt;, insertArticleInfoPrepFuture);
+
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; CompositeFuture.all(
+                insertChannelInfoPrepFuture.compose(preparedStatement -&amp;gt; {
+                    insertChannelInfo = preparedStatement;
+                    &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; Future.succeededFuture();
+                }), insertArticleInfoPrepFuture.compose(preparedStatement -&amp;gt; {
+                    insertArticleInfo = preparedStatement;
+                    &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; Future.succeededFuture();
+                })
+        ).mapEmpty();
+    }&lt;/code&gt;&lt;/pre&gt;
+
+
+&lt;h1 id=&quot;observing&quot;&gt;Observing&lt;/h1&gt;
+&lt;p&gt;After all this changes you should ensure that the first endpoint is working correctly. So you need to run the application, go to localhost:8080 insert a link to a rss feed there(&lt;a href=&quot;http://feeds.bbci.co.uk/news/uk/rss.xml&quot;&gt;BBC UK feed news&lt;/a&gt; for example) and then click the &lt;em&gt;ENTER&lt;/em&gt; button. Now you can connect to your local Cassandra instance, for instance with &lt;a href=&quot;https://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlsh.html&quot;&gt;cqlsh&lt;/a&gt;, and find out how RSS feed data had been saved in the rss_reader keyspace:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs sh&quot;&gt;cqlsh&amp;gt; SELECT * FROM rss_reader.rss_by_user limit &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;  ;
+
+ login | rss_link
+-------+-----------------------------------------
+ Pavel | http://feeds.bbci.co.uk/news/uk/rss.xml
+
+(&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt; rows)
+cqlsh&amp;gt; SELECT description FROM rss_reader.articles_by_rss_link  limit &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;;
+
+ description
+-------------------------------------
+ BBC coverage of latest developments
+
+(&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt; rows)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;In this article we figured out how to implement the first endpoint of RSS-reader app. If you have any problems with completing this step you can checkout to &lt;code&gt;step_2&lt;/code&gt;, where you can find all changes made for completing this step:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;hljs bash&quot;&gt;git checkout step_2&lt;/code&gt;&lt;/pre&gt;
+
+
+&lt;p&gt;Thanks for reading this. I hope you enjoyed reading this article. See you soon on our &lt;a href=&quot;https://gitter.im/eclipse-vertx/vertx-users&quot;&gt;Gitter channel&lt;/a&gt;!&lt;/p&gt;
+&lt;/article&gt;</description>
+	<pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+</item>
+<item>
+	<title>JBoss Tools Team: Integration Tooling for Eclipse Photon</title>
+	<guid isPermaLink="true">https://tools.jboss.org/blog/integration-stack-4.6.0.Final.html</guid>
+	<link>https://tools.jboss.org/blog/integration-stack-4.6.0.Final.html</link>
+	<description>&lt;div&gt;&lt;div id=&quot;preamble&quot;&gt;
+      &lt;div class=&quot;sectionbody&quot;&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;&lt;strong&gt;Try our leaner, complete Eclipse Photon and Red Hat Developer Studio 12 compatible integration tooling.&lt;/strong&gt;&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;imageblock&quot;&gt;
+      &lt;div class=&quot;content&quot;&gt;
+      &lt;img alt=&quot;devstudio12&quot; src=&quot;https://tools.jboss.org/blog/images/devstudio12.png&quot; /&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;&lt;strong&gt;JBoss Tools Integration Stack 4.6.0.Final / Red Hat Developer Studio Integration Stack 12.0.0.GA&lt;/strong&gt;&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;admonitionblock note&quot;&gt;
+      &lt;table&gt;
+      &lt;tbody&gt;&lt;tr&gt;
+      &lt;td class=&quot;icon&quot;&gt;
+      &lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+      &lt;/td&gt;
+      &lt;td class=&quot;content&quot;&gt;
+      All of the Integration Stack components have been verified to work with the same dependencies as JBoss Tools 4.6 and Red Hat Developer Studio 12.
+      &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;&lt;/table&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect1&quot;&gt;
+      &lt;h2 id=&quot;what-s-new-for-this-release&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#what-s-new-for-this-release&quot;&gt;&lt;/a&gt;What’s new for this release?&lt;/h2&gt;
+      &lt;div class=&quot;sectionbody&quot;&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;This is the initial release in support of Eclipse Photon.  It syncs up with Developer Studio 12.0.0, JBoss Tools 4.6.0 and Eclipse 4.8.0 (Photon).  It is also a maintenance release for Teiid Designer and BRMS tooling.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect2&quot;&gt;
+      &lt;h3 id=&quot;released-tooling-highlights&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#released-tooling-highlights&quot;&gt;&lt;/a&gt;Released Tooling Highlights&lt;/h3&gt;
+      &lt;div class=&quot;sect3&quot;&gt;
+      &lt;h4 id=&quot;business-process-and-rules-development&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#business-process-and-rules-development&quot;&gt;&lt;/a&gt;Business Process and Rules Development&lt;/h4&gt;
+      &lt;div class=&quot;sect4&quot;&gt;
+      &lt;h5 id=&quot;bpmn2-modeler-known-issues&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#bpmn2-modeler-known-issues&quot;&gt;&lt;/a&gt;BPMN2 Modeler Known Issues&lt;/h5&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;See the &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_jboss_developer_studio_integration_stack/12.0/html/12.0.0_release_notes_and_known_issues/resolved_issues#bpmn2_1_5_0_final&quot;&gt;BPMN2 1.5.0.Final Known Issues Section&lt;/a&gt; of the Integration Stack 12.0.0.GA release notes.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect4&quot;&gt;
+      &lt;h5 id=&quot;drools-jbpm6-known-issues&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#drools-jbpm6-known-issues&quot;&gt;&lt;/a&gt;Drools/jBPM6 Known Issues&lt;/h5&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;See the &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_jboss_developer_studio_integration_stack/12.0/html/12.0.0_release_notes_and_known_issues/resolved_issues#drools_7_8_0_final&quot;&gt;Drools 7.8.0.Final Known Issues Section&lt;/a&gt; of the Integration Stack 12.0.0.GA release notes.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect3&quot;&gt;
+      &lt;h4 id=&quot;data-virtualization-highlights&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#data-virtualization-highlights&quot;&gt;&lt;/a&gt;Data Virtualization Highlights&lt;/h4&gt;
+      &lt;div class=&quot;sect4&quot;&gt;
+      &lt;h5 id=&quot;teiid-designer&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#teiid-designer&quot;&gt;&lt;/a&gt;Teiid Designer&lt;/h5&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;See the &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_jboss_developer_studio_integration_stack/12.0/html/12.0.0_release_notes_and_known_issues/resolved_issues#teiid_designer_11_2_0_final&quot;&gt;Teiid Designer 11.2.0.Final Resolved Issues Section&lt;/a&gt; of the Integration Stack 12.0.0.GA release notes.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect1&quot;&gt;
+      &lt;h2 id=&quot;what-s-an-integration-stack&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#what-s-an-integration-stack&quot;&gt;&lt;/a&gt;What’s an Integration Stack?&lt;/h2&gt;
+      &lt;div class=&quot;sectionbody&quot;&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;Red Hat Developer Studio Integration Stack is a set of Eclipse-based development tools. It further enhances the IDE functionality provided by Developer Studio, with plug-ins specifically for use when developing for other Red Hat products.  It’s where DataVirt Tooling and BRMS tooling are aggregated.  The following frameworks are supported:&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect2&quot;&gt;
+      &lt;h3 id=&quot;red-hat-business-process-and-rules-development&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#red-hat-business-process-and-rules-development&quot;&gt;&lt;/a&gt;Red Hat Business Process and Rules Development&lt;/h3&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;Business Process and Rules Development plug-ins provide design, debug and testing tooling for developing business processes for Red Hat BRMS and Red Hat BPM Suite.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;ulist&quot;&gt;
+      &lt;ul&gt;
+      &lt;li&gt;
+      &lt;p&gt;&lt;a href=&quot;https://tools.jboss.org/features/bpel.html&quot;&gt;BPEL Designer&lt;/a&gt; - Orchestrating your business processes.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+      &lt;p&gt;&lt;a href=&quot;https://tools.jboss.org/features/bpmn2.html&quot;&gt;BPMN2 Modeler&lt;/a&gt; - A graphical modeling tool which allows creation and editing of Business Process Modeling Notation diagrams using graphiti.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+      &lt;p&gt;&lt;a href=&quot;https://tools.jboss.org/features/drools.html&quot;&gt;Drools&lt;/a&gt; - A Business Logic integration Platform which provides a unified and integrated platform for Rules, Workflow and Event Processing including KIE.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+      &lt;p&gt;&lt;a href=&quot;https://tools.jboss.org/features/jbpm.html&quot;&gt;jBPM&lt;/a&gt; - A flexible Business Process Management (BPM) suite.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect2&quot;&gt;
+      &lt;h3 id=&quot;red-hat-data-virtualization-development&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#red-hat-data-virtualization-development&quot;&gt;&lt;/a&gt;Red Hat Data Virtualization Development&lt;/h3&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;Red Hat Data Virtualization Development plug-ins provide a graphical interface to manage various aspects of Red Hat Data Virtualization instances, including the ability to design virtual databases and interact with associated governance repositories.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;ulist&quot;&gt;
+      &lt;ul&gt;
+      &lt;li&gt;
+      &lt;p&gt;&lt;a href=&quot;https://tools.jboss.org/features/teiiddesigner.html&quot;&gt;Teiid Designer&lt;/a&gt; - A visual tool that enables rapid, model-driven definition, integration, management and testing of data services without programming using the Teiid runtime framework.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect2&quot;&gt;
+      &lt;h3 id=&quot;the-jboss-tools-website-features-tab&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#the-jboss-tools-website-features-tab&quot;&gt;&lt;/a&gt;The JBoss Tools website features tab&lt;/h3&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;Don’t miss the &lt;a href=&quot;https://tools.jboss.org/features&quot;&gt;Features tab&lt;/a&gt; for up to date information on your favorite Integration Stack components.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sect1&quot;&gt;
+      &lt;h2 id=&quot;installation&quot;&gt;&lt;a class=&quot;anchor&quot; href=&quot;http://tools.jboss.org/blog/news.atom#installation&quot;&gt;&lt;/a&gt;Installation&lt;/h2&gt;
+      &lt;div class=&quot;sectionbody&quot;&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;The easiest way to install the Integration Stack components is through the &lt;a href=&quot;https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?downloadType=distributions&amp;amp;product=jbossdeveloperstudio&amp;amp;version=12.0.0&quot;&gt;stand-alone installer&lt;/a&gt; or through our &lt;a href=&quot;http://tools.jboss.org/downloads/overview.html&quot;&gt;JBoss Tools Download Site&lt;/a&gt;.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;For a complete set of Integration Stack installation instructions, see &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_jboss_developer_studio_integration_stack/12.0/html/installation_guide/&quot;&gt;Integration Stack Installation Guide&lt;/a&gt;&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;&lt;em&gt;Let us know how it goes!&lt;/em&gt;&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;paragraph&quot;&gt;
+      &lt;p&gt;Paul Leacu.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;/div&gt;&lt;/div&gt;</description>
+	<pubDate>Tue, 14 Aug 2018 14:55:52 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Ditto: Announcing Ditto Milestone 0.8.0-M1</title>
+	<guid isPermaLink="true">https://www.eclipse.org/ditto/2018-08-14-milestone-announcement-080-M1.html</guid>
+	<link>https://www.eclipse.org/ditto/2018-08-14-milestone-announcement-080-M1.html</link>
+	<description>&lt;p&gt;Even during the summer break the Ditto team worked hard in order to provide the next milestone release. Here it is: 
+Milestone 0.8.0-M1.&lt;/p&gt;
+
+&lt;p&gt;Have a look at the Milestone &lt;a href=&quot;https://www.eclipse.org/ditto/release_notes_080-M1.html&quot;&gt;0.8.0-M1 release notes&lt;/a&gt; for what changed in detail and why
+there was a version bump from 0.3.0-M2 to 0.8.0-M1.&lt;/p&gt;
+
+&lt;p&gt;The main changes and new features are&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;security enhancement by making some of Ditto’s headers not settable from the outside&lt;/li&gt;
+  &lt;li&gt;report application metrics to Prometheus&lt;/li&gt;
+  &lt;li&gt;automatically form a cluster when running in Kubernetes&lt;/li&gt;
+  &lt;li&gt;improvement of Ditto’s &lt;code class=&quot;highlighter-rouge&quot;&gt;things-service&lt;/code&gt; memory consumption&lt;/li&gt;
+  &lt;li&gt;stabilization of the connectivity to AMQP 1.0 and 0.9.1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;artifacts&quot;&gt;Artifacts&lt;/h2&gt;
+
+&lt;p&gt;The new Java artifacts have been published at the &lt;a href=&quot;https://repo.eclipse.org/content/repositories/ditto/&quot;&gt;Eclipse Maven repository&lt;/a&gt;
+as well as &lt;a href=&quot;https://repo1.maven.org/maven2/org/eclipse/ditto/&quot;&gt;Maven central&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The Docker images have been pushed to Docker Hub:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-policies/&quot;&gt;eclipse/ditto-policies&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-things/&quot;&gt;eclipse/ditto-things&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-things-search/&quot;&gt;eclipse/ditto-things-search&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-gateway/&quot;&gt;eclipse/ditto-gateway&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-connectivity/&quot;&gt;eclipse/ditto-connectivity&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hub.docker.com/r/eclipse/ditto-concierge/&quot;&gt;eclipse/ditto-concierge&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+&lt;br /&gt;&lt;/p&gt;
+&lt;figure&gt;&lt;img alt=&quot;Ditto&quot; class=&quot;docimage&quot; src=&quot;https://www.eclipse.org/ditto/images/ditto.svg&quot; /&gt;&lt;/figure&gt;
+
+&lt;p&gt;–&lt;br /&gt;
+The Eclipse Ditto team&lt;/p&gt;</description>
+	<pubDate>Tue, 14 Aug 2018 04:00:00 +0000</pubDate>
+</item>
+<item>
+	<title>Maximilian and Jonas: EMF Forms 1.17.0 Feature: Table Detail Panes</title>
+	<guid isPermaLink="false">https://eclipsesource.com/?p=39783</guid>
+	<link>https://eclipsesource.com/blogs/2018/08/10/emf-forms-1-17-0-feature-table-detail-panes/</link>
+	<description>&lt;p&gt;&lt;a href=&quot;https://www.eclipse.org/ecp/emfforms/&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;EMF Forms&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; makes it easy to create forms that are capable of editing your data based on an EMF model. To get started with EMF Forms please refer to &lt;/span&gt;&lt;a href=&quot;http://eclipsesource.com/blogs/tutorials/getting-started-with-EMF-Forms/&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;our tutorial&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;. If you are an adopter of EMF Forms, please note, that &lt;/span&gt;&lt;b&gt;we have recently published 1.17.1 an update to 1.17.0. &lt;/b&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;The update fixes three bugs which occurred if you use EMF Forms in Photon. Please see &lt;/span&gt;&lt;a href=&quot;https://projects.eclipse.org/projects/modeling.ecp/releases/1.17.1&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; for details and &lt;/span&gt;&lt;a href=&quot;http://www.eclipse.org/ecp/emfforms/download.html&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;our download page&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; to get the new release.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;In this post, we would like to outline a new feature in the 1.17.0 release: &lt;/span&gt;&lt;b&gt;The improved table detail panes&lt;/b&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;While EMF Forms is well known to support form-based UIs with classic input fields, such as text controls or checkboxes, it also supports showing list of elements in tables and list views, as well as hierarchies in trees.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;As an example, you can very easily create a tree like this:&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;EMF Forms 1.17.0 Feature: Table Detail Panes&quot; class=&quot;alignnone wp-image-39784 size-full&quot; height=&quot;228&quot; src=&quot;https://eclipsesource.com/wp-content/uploads/2018/07/image38.png&quot; width=&quot;1298&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Or a table like this:&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;EMF Forms 1.17.0 Feature: Table Detail Panes&quot; class=&quot;alignnone wp-image-39785 size-full&quot; height=&quot;137&quot; src=&quot;https://eclipsesource.com/wp-content/uploads/2018/07/image36.png&quot; width=&quot;1301&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;With 1.17.0, we have updated the documentation, please see &lt;/span&gt;&lt;a href=&quot;https://eclipsesource.com/blogs/tutorials/emf-forms-view-model-elements/#tablecontrol&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;this tutorial for tables&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; and &lt;/span&gt;&lt;a href=&quot;https://eclipsesource.com/blogs/tutorials/emf-forms-view-model-elements/#treemasterdetail&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;this tutorial for tree view&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Any element showing several elements can allow inline editing (like the EMF Forms table does), or show a detail pane (like the tree does), or both. As an example, if elements shown in a table have many attributes, you could show some of them in the table and then all of them in a detail pane. To do so, just enable the detail pane on the TableControl in the view model:&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;EMF Forms 1.17.0 Feature: Table Detail Panes&quot; class=&quot;alignnone wp-image-39786 size-full&quot; height=&quot;42&quot; src=&quot;https://eclipsesource.com/wp-content/uploads/2018/07/image50.png&quot; width=&quot;547&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;The result, after removing most columns from the table would then look like this:&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;EMF Forms 1.17.0 Feature: Table Detail Panes&quot; class=&quot;alignnone wp-image-39787 size-full&quot; height=&quot;457&quot; src=&quot;https://eclipsesource.com/wp-content/uploads/2018/07/image48.png&quot; width=&quot;844&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Alternatively, you can set the DetailEditing property to “WithDialog”. As a result the renderer opens a separate window showing the details on double clicking an element. With 1.17.0, both options are supported by all table renderers, including the &lt;/span&gt;&lt;a href=&quot;https://eclipsesource.com/blogs/2017/01/02/emf-forms-1-11-0-feature-grid-table-and-more/&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;table renderer based on Nebula Grid&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;You might wonder, where the layout of the detailed pane comes from. This detail itself is rendered with EMF Forms. Therefore, the framework retrieves the view model for the selected element, such that, if you already have a view model for the type “User”, it will be used in the detail pane as well. For this to work, you need to register the view model with EMF Forms by default, via an extension point.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Another minor improvement, which comes with 1.17.0 is that you can also try out those detail panes with a separate view model in the preview provided by the EMF Forms tooling. Therefore, you can add those additional view models to the preview using the “Manage Additional Views” button in the toolbar of the preview.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;EMF Forms 1.17.0 Feature: Table Detail Panes&quot; class=&quot;alignnone wp-image-39788 size-full&quot; height=&quot;300&quot; src=&quot;https://eclipsesource.com/wp-content/uploads/2018/07/image9.png&quot; width=&quot;580&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Any view model added here will be picked up by the preview when a detail pane is to be rendered.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;As for all EMF Forms features, the detail panes of the respective tooling is of course adaptable to even more custom requirements. If there are any features you miss or ways you wish to adapt it, please provide feedback by &lt;/span&gt;&lt;a href=&quot;https://bugs.eclipse.org/bugs/enter_bug.cgi?product=ecp&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;submitting bugs or feature requests&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; or &lt;/span&gt;&lt;a href=&quot;mailto:munich@eclipsesource.com&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;contact us&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt; if you are interested in enhancements or support.&lt;/span&gt;&lt;/p&gt;</description>
+	<pubDate>Fri, 10 Aug 2018 10:06:17 +0000</pubDate>
+</item>
+<item>
+	<title>Andrey Loskutov: We are hiring 2 Eclipse developers</title>
+	<guid isPermaLink="false">tag:blogger.com,1999:blog-342159971341432126.post-4266215239435919015</guid>
+	<link>http://javaclipse.blogspot.com/2018/08/we-are-hiring-2-eclipse-developers.html</link>
+	<description>&lt;div dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;a href=&quot;https://www.advantest.com/en/about-advantest/about-advantest-europe&quot;&gt;We&lt;/a&gt; are hiring again!&lt;br /&gt;&lt;br /&gt;&lt;a href=&quot;https://www.advantest.com/en/about-advantest/about-advantest-europe&quot;&gt;We&lt;/a&gt; have 2 opened positions for Eclipse developers in &lt;a href=&quot;https://goo.gl/maps/FgrdmJnCh8T2&quot;&gt;our main office&lt;/a&gt; in Böblingen, Germany (no, it is not a remote job).&lt;br /&gt;&lt;br /&gt;The job focus is Java/Eclipse development in the context of the very complex Eclipse based IDE used as the front end for the semiconductor tester.&lt;br /&gt;&lt;br /&gt;We speak English and Java here, if you are interested, just drop me a mail.&lt;br /&gt;&lt;br /&gt;&lt;/div&gt;</description>
+	<pubDate>Thu, 09 Aug 2018 12:47:58 +0000</pubDate>
+	<author>noreply@blogger.com (Andrey Loskutov)</author>
+</item>
+<item>
+	<title>Maximilian and Jonas: Modeling Symposium @ EclipseCon Europe 2018</title>
+	<guid isPermaLink="false">https://eclipsesource.com/?p=39797</guid>
+	<link>https://eclipsesource.com/blogs/2018/08/08/modeling-symposium-eclipsecon-europe-2018/</link>
+	<description>&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;We are happy to announce that Ed, Philip and Jonas are organizing the Modeling Symposium for the &lt;a href=&quot;https://www.eclipsecon.org/europe2018&quot;&gt;EclipseCon Europe 2018 in Ludwigsburg&lt;/a&gt;. The symposium aims to provide a forum for community members to present a brief overview of their work. We offer 10 minute lightning slots (including set-up and questions) to facilitate a broad range of speakers. The primary goal is to introduce interesting, new technological features. This targets mainly modeling projects which are otherwise not represented at the conference.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;If you are interested in giving a talk, please send a short description (a few sentences) to munich@eclipsesource.com. Depending on the number, we might have to select among the submissions. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Deadline for submission: Wednesday, September 5th, 2018&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Acceptance/ Decline notification: Monday, September 10th, 2018&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Please adhere to the following guidelines:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Please provide sufficient context. Talks should start with a concise overview of what the presenter plans to demonstrate, or what a certain framework offers.  Even more important, explain how and why this is relevant.&lt;/span&gt;&lt;/li&gt;
+&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Do not bore us! Get to the point quickly.  You do not have to use all your allocation. An interesting 3 minute talk will have a bigger impact than a boring 10 minute talk. We encourage you to plan for a 5 minute talk, leaving room for 5 minutes of discussion.&lt;/span&gt;&lt;/li&gt;
+&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Keep it short and sweet, focus on the most important aspects. A conference offers the major advantage of getting in contact with people who are interested in your work. So consider the talk more as a teaser to prompt follow-up conversations than a forum to demonstrate or discuss technical details in depth.&lt;/span&gt;&lt;/li&gt;
+&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;A demo is worth a thousand slides. We prefer to see how your stuff works rather than be told about how it works with illustrative slides.  Please restrict the slides to summarize your introduction or conclusion.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Looking forward to your submissions!&lt;/span&gt;&lt;/p&gt;</description>
+	<pubDate>Wed, 08 Aug 2018 11:45:27 +0000</pubDate>
+</item>
+<item>
+	<title>Tom Schindl: Supporting OpenJFX 11 from JDK11 onwards in e(fx)clipse</title>
+	<guid isPermaLink="false">http://tomsondev.bestsolution.at/?p=5116</guid>
+	<link>https://tomsondev.bestsolution.at/2018/08/04/supporting-openjfx-11-from-jdk11-onwards-in-efxclipse/</link>
+	<description>&lt;p&gt;So starting with JDK-11 OpenJFX is not part of any downloadable distribution. As JavaFX is designed to run on the module-path (and tested only there) you have 2 options to run JavaFX inside OSGi:&lt;br /&gt;
+* You create your own JDK-Distribution using jlink&lt;br /&gt;
+* You launch the VM you want to use JavaFX adding the JavaFX-Modules&lt;/p&gt;
+&lt;p&gt;While the 2nd solution is doable for RCP-Applications it is less than a nice one, and for integrating into external frameworks (like the Eclipse IDE) it is not possible at all. So we need a different solution to satisfy both usecases.&lt;/p&gt;
+&lt;p&gt;The solution to this problem is that e(fx)clipse installs a classloader hook using the Equinox AdapterHook-Framework (you can do crazy stuff with that) and on the fly spins up a new Java-Module-Layer containing all the JavaFX-Modules and uses the classloader from the Module-Layer to load the JavaFX-Classes.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://tomsondev.bestsolution.at/2018/08/04/supporting-openjfx-11-from-jdk11-onwards-in-efxclipse/open-jfx-11/&quot; rel=&quot;attachment wp-att-5117&quot;&gt;&lt;img alt=&quot;&quot; class=&quot;alignnone size-full wp-image-5117&quot; height=&quot;400&quot; src=&quot;https://tomsondev.files.wordpress.com/2018/08/open-jfx-11.png?w=640&amp;amp;h=400&quot; width=&quot;640&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;With this strategy you can supply the JavaFX-Modules (including the native bits) required for your application to run as part of your p2-repository.&lt;/p&gt;</description>
+	<pubDate>Sat, 04 Aug 2018 21:42:56 +0000</pubDate>
+</item>
+<item>
+	<title>Mikael Barbero: Hi Hauke. Actually, this is happening.</title>
+	<guid isPermaLink="false">https://medium.com/p/f56b35477824</guid>
+	<link>https://medium.com/@mikael.barbero/hi-hauke-actually-this-is-happening-f56b35477824?source=rss-4a3bd8487ad8------2</link>
+	<description>&lt;p&gt;Hi Hauke. Actually, this is happening. See &lt;a href=&quot;https://bugs.eclipse.org/bugs/show_bug.cgi?id=405031&quot;&gt;https://bugs.eclipse.org/bugs/show_bug.cgi?id=405031&lt;/a&gt; (especially &lt;a href=&quot;https://bugs.eclipse.org/bugs/show_bug.cgi?id=405031#c59&quot;&gt;https://bugs.eclipse.org/bugs/show_bug.cgi?id=405031#c59&lt;/a&gt;).&lt;/p&gt;&lt;p&gt;Cheers.&lt;/p&gt;&lt;img height=&quot;1&quot; src=&quot;https://medium.com/_/stat?event=post.clientViewed&amp;amp;referrerSource=full_rss&amp;amp;postId=f56b35477824&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Fri, 03 Aug 2018 06:58:23 +0000</pubDate>
+</item>
+<item>
+	<title>Christopher Guindon: New improvements to the Eclipse Packaging website</title>
+	<guid isPermaLink="true">https://www.chrisguindon.com/post/eclipse-epp-website-improvements/</guid>
+	<link>https://www.chrisguindon.com/post/eclipse-epp-website-improvements/</link>
+	<description>&lt;p&gt;In my previous &lt;a href=&quot;https://www.chrisguindon.com/post/quicksilver-eclipse-org-redesign/&quot;&gt;blog post&lt;/a&gt;, we announced a new look and feel for the Eclipse Foundation website. The &lt;a href=&quot;https://www.chrisguindon.com/post/quicksilver-eclipse-org-redesign/#future-plans&quot;&gt;plan&lt;/a&gt; was to roll out our new design to &lt;a href=&quot;https://www.eclipse.org&quot;&gt;eclipse.org&lt;/a&gt; first and then gradually migrate our other web properties.&lt;/p&gt;
+
+&lt;p&gt;Since then, we migrated our &lt;a href=&quot;https://github.com/eclipsefdn/hugo-solstice-theme&quot;&gt;Hugo theme&lt;/a&gt;, &lt;a href=&quot;https://wiki.eclipse.org/Main_Page&quot;&gt;Eclipsepedia&lt;/a&gt;, &lt;a href=&quot;https://www.eclipse.org/forums/&quot;&gt;Eclipse Community Forums&lt;/a&gt; and a few other Drupal sites, such as the &lt;a href=&quot;https://accounts.eclipse.org/&quot;&gt;Eclipse User Profile&lt;/a&gt; and the &lt;a href=&quot;https://blogs.eclipse.org/&quot;&gt;Eclipse Foundation Blog&lt;/a&gt; to the Quicksilver look and feel!&lt;/p&gt;
+
+&lt;p&gt;This week, I am happy to announce an update to the &lt;a href=&quot;https://www.eclipse.org/downloads/packages/&quot;&gt;Eclipse Packaging&lt;/a&gt; website. For those who don’t know, the Eclipse Packaging website is used to publish download links for the Eclipse Installer and Eclipse Packages.&lt;/p&gt;
+
+&lt;p&gt;I am very proud of the work done here since the original site desperately needed some TLC. I’m hoping the new look and feel will improve the way the Eclipse IDE is downloaded by the  community!&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt=&quot;Eclipse.org new home page&quot; src=&quot;https://www.chrisguindon.com/post/eclipse-epp-website-improvements/before-and-after.jpg&quot; title=&quot;Eclipse.org new home page&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;New features include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A website redesign based off the Quicksilver look and feel.&lt;/li&gt;
+&lt;li&gt;The links to the &lt;a href=&quot;https://www.eclipse.org/downloads/packages/installer&quot;&gt;Eclipse Installer&lt;/a&gt;, &lt;a href=&quot;https://www.eclipse.org/downloads/packages/&quot;&gt;Eclipse Packages&lt;/a&gt; and Eclipse Developer Builds are more accessible via a new submenu beneath our breadcrumbs.&lt;/li&gt;
+&lt;li&gt;Created a new &lt;a href=&quot;https://www.eclipse.org/downloads/packages/installer&quot;&gt;Eclipse Installer download page&lt;/a&gt; page with instructions.&lt;/li&gt;
+&lt;li&gt;Made improvements to our breadcrumb links which allow users to easily find every &lt;a href=&quot;https://www.eclipse.org/downloads/packages/release&quot;&gt;Eclipse release&lt;/a&gt; on the Eclipse Packaging site.&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;More Downloads&lt;/em&gt; sidebar includes links to Eclipse Packages instead of the release train landing page.&lt;/li&gt;
+&lt;li&gt;Links to the Eclipse Installer is available in the sidebar.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally, this migration is also a win for the Eclipse Foundation staff. These changes to the Eclipse Packages site allow us to streamline the Eclipse Release process and no longer requires us to manually submit Gerrit patches to publish a release.&lt;/p&gt;</description>
+	<pubDate>Thu, 02 Aug 2018 14:30:00 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Announcements: We Are Open</title>
+	<guid isPermaLink="true">http://feedproxy.google.com/~r/eclipse/fnews/~3/pFxW2hExaTw/we-are-open</guid>
+	<link>http://feedproxy.google.com/~r/eclipse/fnews/~3/pFxW2hExaTw/we-are-open</link>
+	<description>We Are Open campaign provides a peek into Eclipse community's openness, innovation, and collaboration.&lt;img alt=&quot;&quot; height=&quot;1&quot; src=&quot;http://feeds.feedburner.com/~r/eclipse/fnews/~4/pFxW2hExaTw&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Thu, 02 Aug 2018 13:00:00 +0000</pubDate>
+</item>
+<item>
+	<title>Thabang Mashologu: We Are Open</title>
+	<guid isPermaLink="false">https://blogs.eclipse.org/6634 at https://blogs.eclipse.org</guid>
+	<link>https://blogs.eclipse.org/post/thabang-mashologu/we-are-open</link>
+	<description>&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;Back in April, our Executive Director Mike Milinkovich &lt;a href=&quot;https://mmilinkov.wordpress.com/2018/04/10/eclipse-foundation-new-logo/&quot;&gt;blogged&lt;/a&gt; about a new logo and redesigned website for the Eclipse Foundation. Our new branding is meant to reflect the Foundation’s role beyond the Eclipse IDE. We are proud of our heritage and successfully launched the Eclipse &lt;a href=&quot;https://www.eclipse.org/photon/&quot;&gt;Photon release &lt;/a&gt;recently to a global base of over 4 million active users. But clearly the Eclipse Foundation and its 350+ open source projects represent more than the Eclipse IDE. &lt;/p&gt;
+
+&lt;p&gt;The fact is, we are a leading platform and environment for global developers and organizations to collaborate on open technologies that solve complex problems and enable value creation. &lt;/p&gt;
+
+&lt;p&gt;&lt;img alt=&quot;&quot; src=&quot;https://blogs.eclipse.org/sites/default/files/users/user160/weareopen_1.png&quot; style=&quot;height: 400px; width: 800px;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&quot;http://jakarta.ee&quot;&gt;enterprise Java&lt;/a&gt; to &lt;a href=&quot;http://iot.eclipse.org&quot;&gt;IoT&lt;/a&gt; and &lt;a href=&quot;https://wiki.eclipse.org/OpenADx&quot;&gt;autonomous vehicles&lt;/a&gt;, we are increasingly becoming the open source foundation of choice for digital companies looking for a vendor-neutral governance model to help them to accelerate market adoption of technologies and standards, increase the pace of innovation, and to reduce development costs. In fact, we are supported by over &lt;a href=&quot;https://www.eclipse.org/membership/exploreMembership.php&quot;&gt;275 organizations&lt;/a&gt; who see the strategic, operational and financial value of open source software development at the Eclipse Foundation.&lt;/p&gt;
+
+&lt;p&gt;For thousands of developers around the world, we offer great opportunities to contribute to game-changing technologies, demonstrate expertise, and participate in our vibrant Eclipse community, among many other benefits. At the time of writing, we have over 1,550 committers and counting who power Eclipse projects spanning many technology domains.&lt;/p&gt;
+
+&lt;p&gt;The Foundation marketing team has the fun job of sharing the stories and successes of our community with the world. To that end, we developed the &lt;a href=&quot;https://www.youtube.com/watch?v=3bYpE7K2x60&quot;&gt;We Are Open video campaign&lt;/a&gt; to provide a quick peek into how the Eclipse community represents openness, innovation, and collaboration. We hope you like it, share and subscribe to our various channels!&lt;br /&gt;
+ &lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+	<pubDate>Wed, 01 Aug 2018 18:31:53 +0000</pubDate>
+</item>
+<item>
+	<title>EclipseCon Europe 2018: Accepted Sessions Announced</title>
+	<guid isPermaLink="false">https://www.eclipsecon.org/news/640 at https://www.eclipsecon.org</guid>
+	<link>https://www.eclipsecon.org/europe2018/news/accepted-sessions-announced</link>
+	<description>&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;It was a lot of work for the program committee, but they got it done! And thank you again to all the  community members who sent in a talk proposal.&lt;/p&gt;
+
+&lt;p&gt;Visit &lt;a href=&quot;https://www.eclipsecon.org/europe2018/sessions/accepted&quot; target=&quot;_blank&quot;&gt;this page&lt;/a&gt; to see the list of accepted tutorials and talks.  We expect to have the schedule done by mid-August.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+	<pubDate>Tue, 31 Jul 2018 20:14:20 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Announcements: Eclipse Foundation Announces Jakarta EE Committee Election Results</title>
+	<guid isPermaLink="true">http://feedproxy.google.com/~r/eclipse/fnews/~3/4kRdPZP_inc/20180731-jakartaEE_committee_election.php</guid>
+	<link>http://feedproxy.google.com/~r/eclipse/fnews/~3/4kRdPZP_inc/20180731-jakartaEE_committee_election.php</link>
+	<description>The results are in for Participant and Committer Member elections for representatives to the Jakarta EE Working Group!&lt;img alt=&quot;&quot; height=&quot;1&quot; src=&quot;http://feeds.feedburner.com/~r/eclipse/fnews/~4/4kRdPZP_inc&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Tue, 31 Jul 2018 14:10:00 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Announcements: Eclipse Newsletter | Embedded Development</title>
+	<guid isPermaLink="true">http://feedproxy.google.com/~r/eclipse/fnews/~3/QOriVT-EhRU/</guid>
+	<link>http://feedproxy.google.com/~r/eclipse/fnews/~3/QOriVT-EhRU/</link>
+	<description>This month's newsletter features five articles that focus on Embedded Development. Read it now.&lt;img alt=&quot;&quot; height=&quot;1&quot; src=&quot;http://feeds.feedburner.com/~r/eclipse/fnews/~4/QOriVT-EhRU&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Thu, 26 Jul 2018 13:30:00 +0000</pubDate>
+</item>
+<item>
+	<title>PapyrusUML: Eclipse Newsletter on Papyrus UML Light</title>
+	<guid isPermaLink="false">http://papyrusuml.wordpress.com/?p=1111</guid>
+	<link>https://papyrusuml.wordpress.com/2018/07/26/eclipse-newsletter-on-papyrus-uml-light/</link>
+	<description>&lt;p&gt;&lt;a href=&quot;https://papyrusuml.wordpress.com/2018/06/19/new-papyrus-based-tool/&quot;&gt;Back in June&lt;/a&gt;, I reported that a new variant of Papyrus was being funded for development by the Papyrus Industry Consortium.&lt;/p&gt;
+&lt;p&gt;Well there’s no turning back with an &lt;a href=&quot;http://www.eclipse.org/community/eclipse_newsletter/2018/july/papyrus_uml_light.php&quot;&gt;official article&lt;/a&gt; in this month’s Eclipse Newsletter!&lt;/p&gt;</description>
+	<pubDate>Thu, 26 Jul 2018 13:23:18 +0000</pubDate>
+</item>
+<item>
+	<title>Jens Reimann: We scaled IoT – Eclipse Hono in the lab</title>
+	<guid isPermaLink="false">https://dentrassi.de/?p=3921</guid>
+	<link>https://dentrassi.de/2018/07/25/scaling-iot-eclipse-hono/</link>
+	<description>&lt;p&gt;Working for &lt;a href=&quot;https://jobs.redhat.com&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;Red Hat&lt;/a&gt; is awesome. Not only can you work on amazing things, you will also get the tools you need in order to do just that. We wanted to test &lt;a href=&quot;https://eclipse.org/hono&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;Eclipse Hono&lt;/a&gt; (yes, again) and see how far we can scale it. And of course which limits and issues we encounter on the way. So we took the current development version of Hono (0.7) from Eclipse IoT, backed by &lt;a href=&quot;http://enmasse.io&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;EnMasse&lt;/a&gt; 0.21 and ran it on an OpenShift 3.9 cluster.&lt;/p&gt;
+&lt;p&gt;&lt;span id=&quot;more-3921&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note: &lt;/strong&gt; This blog post presents an intermediate result of the whole test, as it is still ongoing. Want to know more? We put in a talk for EclipseCon Europe about this scale test. With a bit of luck we can show you more in person at the end of October in Ludwigsburg.&lt;/p&gt;
+&lt;h2&gt;The lab&lt;/h2&gt;
+&lt;p&gt;From the full test cluster, we received an allocation of 16 nodes with a bit of storage (mostly HDDs), Intel Xeon E5-2620, 2×6 cores (24 threads) each and a mix of 64GB/128GB RAM. 12 nodes got assigned for the IoT cluster, running Eclipse Hono, EnMasse and OpenShift. The remaining 4 nodes made up the simulation cluster for generating the IoT workload. For the simulation cluster, we also deployed OpenShift, simply to re-use the same features like scaling, deploying, building as we did for the IoT cluster. Both clusters are a single master setup. For the IoT cluster, we went with &lt;a href=&quot;https://docs.openshift.com/container-platform/3.9/install_config/persistent_storage/persistent_storage_glusterfs.html&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;GlusterFS&lt;/a&gt; as the storage provider as we wanted to have dynamic provisioning for the broker deployments. Everything is connected by a 1GBit Ethernet link. In the IoT cluster, we allocated 3 nodes for infrastructure-only purposes (like the Docker registry and the OpenShift router). Which left 8 general-purpose compute nodes that Hono could make use of.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://dentrassi.de/wp-content/uploads/eclipse-hono-scaletest2-nodes.svg&quot;&gt;&lt;img alt=&quot;Node distribution&quot; class=&quot;aligncenter size-full wp-image-3943&quot; src=&quot;https://dentrassi.de/wp-content/uploads/eclipse-hono-scaletest2-nodes.svg&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;The test&lt;/h2&gt;
+&lt;p&gt;The focus of this test was put on telemetry data using HTTP as a transport. For this we simulated devices, sending one message per second. In the context of IoT, you have a bigger number of senders (devices), but they do send less payload and less frequent than e.g. a cloud-side enterprise system might do. It is also most likely that an IoT device wouldn’t send once each second over HTTP. But “per second” is easier to process. And, at least in theory, you could trade in 1.000 devices sending once per second with 10.000 devices sending once every 10 seconds.&lt;/p&gt;
+&lt;p&gt;The simulator cluster consisted of three main components. An InfluxDB to store some metrics. A “consumer” and a “HTTP simulator” deployment. The consumer directly consumed from the EnMasse &lt;a href=&quot;https://qpid.apache.org/components/dispatch-router/index.html&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;Qpid dispatch router&lt;/a&gt; instance via AMQP 1.0, as fast as possible. The HTTP simulator tries to simulate 2.000 devices with a message rate of 1 message per second per device. If the HTTP adapter stalls, it will wait for requests to complete. For the HTTP client, we used the &lt;a href=&quot;https://vertx.io/docs/vertx-web-client/java/&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;Vert.x Web Client&lt;/a&gt;, as it turned out to be the most performant Java HTTP client (aside from having a nice API). So scaling up by single pod means that we increase the IoT workload by 2.000 devices (meaning 2.000 additional messages per second).&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;Testing architecture&quot; class=&quot;aligncenter size-full wp-image-3949&quot; src=&quot;https://dentrassi.de/wp-content/uploads/eclipse-hono-scaletest2-architecture.svg&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;To the max&lt;/h2&gt;
+&lt;p&gt;As a first exercise we tried out a few configurations and see how far we could get. In the end, we were able to saturate the ethernet port of our (initially) two ingress nodes and so decided to re-allocate one node from Eclipse Hono to the OpenShift infrastructure. Having 3 ingress nodes and 8 compute nodes. This did reduce the capacity available for Hono and let us run into a limit of processing messages. However, it seemed better to run into a limit with Hono compared to running into a limit of network throughput. Adding an additional ingress node would be a simple task to do. And if we could improve Hono during the test, then we would actually see more throughput as we have some reserves in network throughput with that third node.&lt;/p&gt;
+&lt;p&gt;The final setup processed something around 80.000 devices with 1 message/second. There was a bit of room above that. But our DNS round-robin “load balancer” was not optimal, so we kept that reserve for further testing.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Please note, that this number may be quite different on other machines, in other environments. We simply used this as a baseline for further testing.&lt;/p&gt;
+&lt;h2&gt;Scaling up&lt;/h2&gt;
+&lt;p&gt;The first automated scenario we ran was a simple scale up test. For that we scaled down all producers and consumer and slowly started to scale up the producers. After adding a new pod it waited until the message flow has settled. If the failure rate is too high, then scale up an additional protocol adapter. Otherwise, scale up another producer and continue.&lt;/p&gt;
+&lt;p&gt;As an acceptable failure rate, this test used 2% of the messages over the last 3 minutes. And a “failure” is actually a rejection of the message at the current point in time. Devices may re-try at a later time to submit its data. For telemetry data, it may be fine to, drop some information (with QoS 0) every now and then. Or use QoS 1 instead and but be aware of the fact that the current request as rejected and re-try at a later time. In any case, if Hono responds with a failure of 503, then the adapter cannot handle any more requests at the moment, leading to an increased failure rate in the simulator.&lt;/p&gt;
+&lt;h2&gt;Initial results&lt;/h2&gt;
+&lt;p&gt;So let’s have a quick look at the results of this test:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;Eclipse Hono scale testing results, number of pods&quot; class=&quot;aligncenter size-full wp-image-3939&quot; src=&quot;https://dentrassi.de/wp-content/uploads/eclipse-hono-scaletest2-chart1.svg&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;This chart shows the scale-up of the simulator pods and the accompanying scale-up of the Eclipse Hono protocol adapter pods. You can also see the number of messages each instance of the protocol adapters processes. It looks like, once we push a few messages into the system, this evens out around 5.000 msgs/s. Meaning that each additional Hono HTTP adapter instance can serve 5.000 more messages/s, or 5.000 devices sending one message per second. Or 50.000 devices sending one message every 10 seconds. And each time we fire up a new instance the whole system can handle 5.000 msgs/s more.&lt;/p&gt;
+&lt;p&gt;In the second chart we can see the failure rate:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;Eclipse Hono scale testing results, failure rate&quot; class=&quot;aligncenter size-full wp-image-3940&quot; src=&quot;https://dentrassi.de/wp-content/uploads/eclipse-hono-scaletest2-chart2.svg&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Now the rule for the test was, that the failure rate has to be below 2% in order for the test to continue scaling up. We the test didn’t do well was to wait a bit longer and see if the failure rate declined even more. The failure rate is a moving average over 3 minutes. For that reason, this behavior has been changed in succeeding tests. The scenario now waits a bit longer before recording the final result of the current step.&lt;/p&gt;
+&lt;p&gt;So what you can see is that the failure rate stays below that “magic” 2% line. But that was the requirement. Except of course for the last entry, where the test was ended as there were no more resources to scale up in order for the scenario to compensate.&lt;/p&gt;
+&lt;h2&gt;Yes it scales&lt;/h2&gt;
+&lt;p&gt;Does Eclipse Hono scale? With charts and numbers, there is always room for interpretation. &lt;img alt=&quot;😉&quot; class=&quot;wp-smiley&quot; src=&quot;https://s.w.org/images/core/emoji/2.4/72x72/1f609.png&quot; style=&quot;height: 1em;&quot; /&gt; But to me, it definitely looks that way. When we increase the IoT workload we can compensate by scaling up protocol adapters in a linear way. Settling around 5.000 msgs/s per protocol adapter instance and keeping that figure until the end of the test. Until we ran out of computing resources.&lt;/p&gt;
+&lt;h2&gt;Want more?&lt;/h2&gt;
+&lt;p&gt;More background? You can have a look at the source code around this test on GitHub at &lt;a href=&quot;https://github.com/redhat-iot/hono-simulator&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;redhat-iot/hono-simulator&lt;/a&gt; and &lt;a href=&quot;https://github.com/redhat-iot/hono-scale-test&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;redhat-iot/hono-scale-test&lt;/a&gt;. But please remember that this setup might be very specific to our infrastructure and test.&lt;/p&gt;
+&lt;p&gt;More details? Come to our talk at EclipseCon Europe if we get accepted and learn more about how we did the test. What improvements we tried out, which issues we ran in and how we set up of our infrastructure. And maybe have a chat with us in person about the gory details of IoT testing.&lt;/p&gt;
+&lt;p&gt;More throughput? Come and join the &lt;a href=&quot;https://github.com/eclipse/hono&quot; rel=&quot;noopener&quot; target=&quot;_blank&quot;&gt;Eclipse Hono community&lt;/a&gt; and bring in your ideas about performance improvements.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href=&quot;https://dentrassi.de/2018/07/25/scaling-iot-eclipse-hono/&quot; rel=&quot;nofollow&quot;&gt;We scaled IoT – Eclipse Hono in the lab&lt;/a&gt; appeared first on &lt;a href=&quot;https://dentrassi.de&quot; rel=&quot;nofollow&quot;&gt;ctron's blog&lt;/a&gt;.&lt;/p&gt;</description>
+	<pubDate>Wed, 25 Jul 2018 12:03:45 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Announcements: Eclipse IoT Day Singapore Announced</title>
+	<guid isPermaLink="true">http://feedproxy.google.com/~r/eclipse/fnews/~3/CpV5Z6GVRI4/</guid>
+	<link>http://feedproxy.google.com/~r/eclipse/fnews/~3/CpV5Z6GVRI4/</link>
+	<description>The very first Eclipse IoT Day Singapore will take place Sept. 18 in co-location with IoT World Asia 2018.&lt;img alt=&quot;&quot; height=&quot;1&quot; src=&quot;http://feeds.feedburner.com/~r/eclipse/fnews/~4/CpV5Z6GVRI4&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Tue, 24 Jul 2018 11:00:00 +0000</pubDate>
+</item>
+<item>
+	<title>Donald Raab: EC by Example: Collectors2</title>
+	<guid isPermaLink="false">https://medium.com/p/bb5cd450d876</guid>
+	<link>https://medium.com/@donraab/ec-by-example-collectors2-bb5cd450d876?source=rss-df39b86e9f04------2</link>
+	<description>&lt;p&gt;Learn how to transition to &lt;a href=&quot;https://github.com/eclipse/eclipse-collections&quot;&gt;Eclipse Collections&lt;/a&gt; types using &lt;a href=&quot;https://github.com/eclipse/eclipse-collections/blob/master/eclipse-collections/src/main/java/org/eclipse/collections/impl/collector/Collectors2.java&quot;&gt;&lt;em&gt;Collectors2&lt;/em&gt;&lt;/a&gt;&lt;em&gt; &lt;/em&gt;with any Java &lt;em&gt;Stream&lt;/em&gt;.&lt;/p&gt;&lt;figure&gt;&lt;img alt=&quot;&quot; src=&quot;https://cdn-images-1.medium.com/max/1024/1*gJXYpVwie10nKEq4wzjUjg.png&quot; /&gt;Visualizing Collectors2&lt;/figure&gt;&lt;h3&gt;Anatomy of a Collector&lt;/h3&gt;&lt;p&gt;One of the many great additions to Java 8 was the interface named &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html&quot;&gt;&lt;em&gt;Collector&lt;/em&gt;&lt;/a&gt;&lt;em&gt;. &lt;/em&gt;A &lt;em&gt;Collector&lt;/em&gt; can be used with the &lt;em&gt;collect&lt;/em&gt; method on the &lt;em&gt;Stream&lt;/em&gt; interface. The &lt;em&gt;collect&lt;/em&gt; method will allow you to reduce a &lt;em&gt;Stream&lt;/em&gt; to any type you want. Java 8 included a set of stock &lt;em&gt;Collector&lt;/em&gt; implementations which are part of the &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html&quot;&gt;&lt;em&gt;Collectors&lt;/em&gt;&lt;/a&gt; utility class. &lt;a href=&quot;http://www.eclipse.org/collections/&quot;&gt;Eclipse Collections&lt;/a&gt; includes another set of &lt;em&gt;Collector&lt;/em&gt; implementations that return Eclipse Collections types. The name of the utility class in Eclipse Collections is &lt;a href=&quot;https://www.eclipse.org/collections/javadoc/9.2.0/org/eclipse/collections/impl/collector/Collectors2.html&quot;&gt;&lt;em&gt;Collectors2&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;So what is a &lt;em&gt;Collector&lt;/em&gt;? Let’s take a look at the &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html&quot;&gt;interface&lt;/a&gt; to find out. There are five public instance methods on a &lt;em&gt;Collector&lt;/em&gt;.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;supplier → Supplier&amp;lt;A&amp;gt;&lt;/li&gt;&lt;li&gt;accumulator → BiConsumer&amp;lt;A, T&amp;gt;&lt;/li&gt;&lt;li&gt;combiner → BinaryOperator&amp;lt;A&amp;gt;&lt;/li&gt;&lt;li&gt;finisher → Function&amp;lt;A, R&amp;gt;&lt;/li&gt;&lt;li&gt;characteristics → Set&amp;lt;Characteristics&amp;gt; → Enum(&lt;strong&gt;CONCURRENT&lt;/strong&gt;, &lt;strong&gt;UNORDERED&lt;/strong&gt;, &lt;strong&gt;IDENTITY_FINISH&lt;/strong&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;There are also two static &lt;em&gt;of&lt;/em&gt; methods on Collector which can be used to easily create your own Collector implementations.&lt;/p&gt;&lt;p&gt;So let’s see how we can create a Collector to better understand what these individual components are used for.&lt;/p&gt;&lt;pre&gt;@Test&lt;br /&gt;public void collector()&lt;br /&gt;{&lt;br /&gt;    Collector&amp;lt;String, Set&amp;lt;String&amp;gt;, Set&amp;lt;String&amp;gt;&amp;gt; toCOWASet =&lt;br /&gt;            Collector.&lt;em&gt;of&lt;/em&gt;(&lt;br /&gt;                    HashSet::new,              &lt;strong&gt;&lt;em&gt;// supplier&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;                    &lt;/em&gt;Set::add,                  &lt;strong&gt;&lt;em&gt;// accumulator&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;                    &lt;/em&gt;(set1, set2) -&amp;gt; {          &lt;strong&gt;&lt;em&gt;// combiner&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;                        &lt;/em&gt;set1.addAll(set2);&lt;br /&gt;                        return set1;&lt;br /&gt;                    },&lt;br /&gt;                    CopyOnWriteArraySet::new); &lt;strong&gt;&lt;em&gt;// finisher&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;    &lt;/em&gt;List&amp;lt;String&amp;gt; strings = Arrays.&lt;em&gt;asList&lt;/em&gt;(&lt;strong&gt;&quot;a&quot;&lt;/strong&gt;, &lt;strong&gt;&quot;b&quot;&lt;/strong&gt;, &lt;strong&gt;&quot;c&quot;&lt;/strong&gt;);&lt;br /&gt;    Set&amp;lt;String&amp;gt; set =&lt;br /&gt;            strings.stream().collect(toCOWASet);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(new HashSet&amp;lt;&amp;gt;(strings), set);&lt;br /&gt;}&lt;/pre&gt;&lt;p&gt;Here I use the static &lt;em&gt;of&lt;/em&gt; method which takes five parameters. I leave the var arg’d final parameter for characteristics empty here. The &lt;em&gt;supplier&lt;/em&gt; here creates a new &lt;em&gt;HashSet&lt;/em&gt;. The &lt;em&gt;accumulator&lt;/em&gt; is used to specify what operation to apply on the object created using the &lt;em&gt;supplier&lt;/em&gt;. The items in the &lt;em&gt;Stream&lt;/em&gt; will be passed to the &lt;em&gt;add&lt;/em&gt; method of the &lt;em&gt;Set&lt;/em&gt;. The &lt;em&gt;combiner&lt;/em&gt; is used to specify how collections should be merged in the case where a &lt;em&gt;parallelStream&lt;/em&gt; is used. I cannot use a method reference for the combiner here because one of the collections must be returned, and the &lt;em&gt;addAll&lt;/em&gt; method on Collection returns a &lt;em&gt;boolean&lt;/em&gt;. Finally, the &lt;em&gt;finisher&lt;/em&gt; coverts the final result to a &lt;em&gt;CopyOnWriteArraySet&lt;/em&gt;.&lt;/p&gt;&lt;h3&gt;Building a reusable Collector&lt;/h3&gt;&lt;p&gt;The &lt;em&gt;Collector&lt;/em&gt; example above would not be very useful if it needed to be inlined directly in code as it is rather verbose. It would be much more useful if it could handle any type instead of just &lt;em&gt;String&lt;/em&gt;. This can be done easily by moving the construction of this &lt;em&gt;Collector&lt;/em&gt; to a static method and giving it a name like &lt;em&gt;toCopyOnWriteArraySet&lt;/em&gt;.&lt;/p&gt;&lt;pre&gt;public static &amp;lt;T&amp;gt; Collector&amp;lt;T, ?, Set&amp;lt;T&amp;gt;&amp;gt; toCopyOnWriteArraySet()&lt;br /&gt;{&lt;br /&gt;    return Collector.&amp;lt;T, Set&amp;lt;T&amp;gt;, Set&amp;lt;T&amp;gt;&amp;gt;&lt;em&gt;of&lt;/em&gt;(&lt;br /&gt;            HashSet::new,              &lt;strong&gt;&lt;em&gt;// supplier&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;            &lt;/em&gt;Set::add,                  &lt;strong&gt;&lt;em&gt;// accumulator&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;            &lt;/em&gt;(set1, set2) -&amp;gt; {          &lt;strong&gt;&lt;em&gt;// combiner&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;                &lt;/em&gt;set1.addAll(set2);&lt;br /&gt;                return set1;&lt;br /&gt;            },&lt;br /&gt;            CopyOnWriteArraySet::new,  &lt;strong&gt;&lt;em&gt;// finisher&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;            &lt;/em&gt;Collector.Characteristics.&lt;strong&gt;&lt;em&gt;UNORDERED&lt;/em&gt;&lt;/strong&gt;); &lt;strong&gt;&lt;em&gt;// characteristics&lt;/em&gt;&lt;/strong&gt;&lt;em&gt;&lt;br /&gt;&lt;/em&gt;}&lt;br /&gt;&lt;br /&gt;@Test&lt;br /&gt;public void reusableCollector()&lt;br /&gt;{&lt;br /&gt;    List&amp;lt;String&amp;gt; strings = Arrays.&lt;em&gt;asList&lt;/em&gt;(&lt;strong&gt;&quot;a&quot;&lt;/strong&gt;, &lt;strong&gt;&quot;b&quot;&lt;/strong&gt;, &lt;strong&gt;&quot;c&quot;&lt;/strong&gt;);&lt;br /&gt;    Set&amp;lt;String&amp;gt; set1 =&lt;br /&gt;            strings.stream().collect(&lt;em&gt;toCopyOnWriteArraySet&lt;/em&gt;());&lt;br /&gt;    Verify.&lt;em&gt;assertInstanceOf&lt;/em&gt;(CopyOnWriteArraySet.class, set1);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(new HashSet&amp;lt;&amp;gt;(strings), set1);&lt;br /&gt;&lt;br /&gt;    List&amp;lt;Integer&amp;gt; integers = Arrays.&lt;em&gt;asList&lt;/em&gt;(1, 2, 3);&lt;br /&gt;    Set&amp;lt;Integer&amp;gt; set2 =&lt;br /&gt;            integers.stream().collect(&lt;em&gt;toCopyOnWriteArraySet&lt;/em&gt;());&lt;br /&gt;    Verify.&lt;em&gt;assertInstanceOf&lt;/em&gt;(CopyOnWriteArraySet.class, set2);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(new HashSet&amp;lt;&amp;gt;(integers), set2);&lt;br /&gt;}&lt;/pre&gt;&lt;p&gt;Now I’ve created a reusable &lt;em&gt;Collector&lt;/em&gt; that can be used with a &lt;em&gt;Stream&lt;/em&gt; of any type. I’ve additionally specified a &lt;em&gt;Collector.Characteristics&lt;/em&gt; in the reusable implementation. These characteristics can be used by the &lt;em&gt;Stream&lt;/em&gt; collect method to optimize the reduction implementation. Since I am accumulating to a &lt;em&gt;Set&lt;/em&gt; which is unordered in this case, it makes sense to use the &lt;strong&gt;UNORDERED&lt;/strong&gt; characteristic.&lt;/p&gt;&lt;h3&gt;Filtering with Collectors2&lt;/h3&gt;&lt;p&gt;In order to filter with &lt;a href=&quot;https://www.eclipse.org/collections/javadoc/9.2.0/org/eclipse/collections/impl/collector/Collectors2.html&quot;&gt;&lt;em&gt;Collectors2&lt;/em&gt;&lt;/a&gt;, you will need three things:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;A &lt;em&gt;select&lt;/em&gt;, &lt;em&gt;reject&lt;/em&gt;, or &lt;em&gt;partition&lt;/em&gt; &lt;em&gt;Collector&lt;/em&gt;&lt;/li&gt;&lt;li&gt;A &lt;em&gt;Predicate&lt;/em&gt;&lt;/li&gt;&lt;li&gt;A target collection &lt;em&gt;Supplier&lt;/em&gt;&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Here are examples using &lt;em&gt;select&lt;/em&gt;, &lt;em&gt;reject&lt;/em&gt;, and &lt;em&gt;partition&lt;/em&gt; with Collectors2.&lt;/p&gt;&lt;pre&gt;@Test&lt;br /&gt;public void filtering()&lt;br /&gt;{&lt;br /&gt;    List&amp;lt;Integer&amp;gt; list = Arrays.&lt;em&gt;asList&lt;/em&gt;(1, 2, 3, 4, 5);&lt;br /&gt;    Predicate&amp;lt;Integer&amp;gt; evens = i -&amp;gt; i % 2 == 0;&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;Integer&amp;gt; selectedList = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;select&lt;/em&gt;(evens, Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;    MutableSet&amp;lt;Integer&amp;gt; selectedSet = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;select&lt;/em&gt;(evens, Sets.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;Integer&amp;gt; rejectedList = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;reject&lt;/em&gt;(evens, Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;    MutableSet&amp;lt;Integer&amp;gt; rejectedSet = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;reject&lt;/em&gt;(evens, Sets.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;&lt;br /&gt;    PartitionList&amp;lt;Integer&amp;gt; partitionList = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;partition&lt;/em&gt;(evens, PartitionFastList::new));&lt;br /&gt;    PartitionSet&amp;lt;Integer&amp;gt; partitionSet = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;partition&lt;/em&gt;(evens, PartitionUnifiedSet::new));&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(selectedList, partitionList.getSelected());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(rejectedList, partitionList.getRejected());&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(selectedSet, partitionSet.getSelected());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(rejectedSet, partitionSet.getRejected());&lt;br /&gt;}&lt;/pre&gt;&lt;h3&gt;Transforming with Collectors2&lt;/h3&gt;&lt;p&gt;There are several methods which provide different transformations using Collectors2. The most basic transformation is available through the &lt;em&gt;collect&lt;/em&gt; method. In order to use &lt;em&gt;collect&lt;/em&gt;, you will need two things:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;A &lt;em&gt;Function&lt;/em&gt;&lt;/li&gt;&lt;li&gt;A target collection &lt;em&gt;Supplier&lt;/em&gt;&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;The other transforming Collectors I will demonstrate below are &lt;em&gt;makeString&lt;/em&gt;, &lt;em&gt;zip&lt;/em&gt;, &lt;em&gt;zipWithIndex&lt;/em&gt;, &lt;em&gt;chunk&lt;/em&gt;, and &lt;em&gt;flatCollect&lt;/em&gt;.&lt;/p&gt;&lt;pre&gt;@Test&lt;br /&gt;public void transforming()&lt;br /&gt;{&lt;br /&gt;    List&amp;lt;Integer&amp;gt; list = Arrays.&lt;em&gt;asList&lt;/em&gt;(1, 2, 3, 4, 5);&lt;br /&gt;    MutableList&amp;lt;String&amp;gt; strings = list.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;collect&lt;/em&gt;(Object::toString,&lt;br /&gt;                    Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;&lt;br /&gt;    String string = list.stream().collect(Collectors2.&lt;em&gt;makeString&lt;/em&gt;());&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(string, strings.makeString());&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;Pair&amp;lt;Integer, String&amp;gt;&amp;gt; zipped =&lt;br /&gt;            list.stream().collect(Collectors2.&lt;em&gt;zip&lt;/em&gt;(strings));&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(Tuples.&lt;em&gt;pair&lt;/em&gt;(1, &lt;strong&gt;&quot;1&quot;&lt;/strong&gt;), zipped.getFirst());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(Tuples.&lt;em&gt;pair&lt;/em&gt;(5, &lt;strong&gt;&quot;5&quot;&lt;/strong&gt;), zipped.getLast());&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;ObjectIntPair&amp;lt;Integer&amp;gt;&amp;gt; zippedWithIndex =&lt;br /&gt;            list.stream().collect(Collectors2.&lt;em&gt;zipWithIndex&lt;/em&gt;());&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            PrimitiveTuples.&lt;em&gt;pair&lt;/em&gt;(Integer.&lt;em&gt;valueOf&lt;/em&gt;(1), 0),&lt;br /&gt;            zippedWithIndex.getFirst());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            PrimitiveTuples.&lt;em&gt;pair&lt;/em&gt;(Integer.&lt;em&gt;valueOf&lt;/em&gt;(5), 4),&lt;br /&gt;            zippedWithIndex.getLast());&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;MutableList&amp;lt;Integer&amp;gt;&amp;gt; chunked =&lt;br /&gt;            list.stream().collect(Collectors2.&lt;em&gt;chunk&lt;/em&gt;(2));&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2), chunked.getFirst());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(5), chunked.getLast());&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;Integer&amp;gt; flattened = chunked.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;flatCollect&lt;/em&gt;(e -&amp;gt; e, Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty));&lt;br /&gt;&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(list, flattened);&lt;br /&gt;}&lt;/pre&gt;&lt;h3&gt;Converting with Collectors2&lt;/h3&gt;&lt;p&gt;There are two sets of converting &lt;em&gt;Collector&lt;/em&gt; implementations available in &lt;em&gt;Collectors2&lt;/em&gt;. One set converts to &lt;em&gt;MutableCollection&lt;/em&gt; types. The other converts to &lt;em&gt;ImmutableCollection&lt;/em&gt; types.&lt;/p&gt;&lt;h4&gt;Collectors converting to Mutable Collections&lt;/h4&gt;&lt;pre&gt;@Test&lt;br /&gt;public void convertingToMutable()&lt;br /&gt;{&lt;br /&gt;    List&amp;lt;Integer&amp;gt; source = Arrays.&lt;em&gt;asList&lt;/em&gt;(2, 1, 4, 3, 5);&lt;br /&gt;    MutableBag&amp;lt;Integer&amp;gt; bag = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toBag&lt;/em&gt;());&lt;br /&gt;    MutableSortedBag&amp;lt;Integer&amp;gt; sortedBag = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toSortedBag&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Bags.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), bag);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            SortedBags.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedBag);&lt;br /&gt;&lt;br /&gt;    MutableSet&amp;lt;Integer&amp;gt; set = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toSet&lt;/em&gt;());&lt;br /&gt;    MutableSortedSet&amp;lt;Integer&amp;gt; sortedSet = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toSortedSet&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Sets.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), set);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            SortedSets.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedSet);&lt;br /&gt;&lt;br /&gt;    MutableList&amp;lt;Integer&amp;gt; list = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toList&lt;/em&gt;());&lt;br /&gt;    MutableList&amp;lt;Integer&amp;gt; sortedList = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toSortedList&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(2, 1, 4, 3, 5), list);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedList);&lt;br /&gt;&lt;br /&gt;    MutableMap&amp;lt;String, Integer&amp;gt; map =&lt;br /&gt;            source.stream().limit(4).collect(&lt;br /&gt;                    Collectors2.&lt;em&gt;toMap&lt;/em&gt;(Object::toString, e -&amp;gt; e));&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Maps.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(&lt;strong&gt;&quot;2&quot;&lt;/strong&gt;, 2, &lt;strong&gt;&quot;1&quot;&lt;/strong&gt;, 1, &lt;strong&gt;&quot;4&quot;&lt;/strong&gt;, 4, &lt;strong&gt;&quot;3&quot;&lt;/strong&gt;, 3), &lt;br /&gt;            map);&lt;br /&gt;&lt;br /&gt;    MutableBiMap&amp;lt;String, Integer&amp;gt; biMap =&lt;br /&gt;            source.stream().limit(4).collect(&lt;br /&gt;                    Collectors2.&lt;em&gt;toBiMap&lt;/em&gt;(Object::toString, e -&amp;gt; e));&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            BiMaps.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;.with(&lt;strong&gt;&quot;2&quot;&lt;/strong&gt;, 2, &lt;strong&gt;&quot;1&quot;&lt;/strong&gt;, 1, &lt;strong&gt;&quot;4&quot;&lt;/strong&gt;, 4, &lt;strong&gt;&quot;3&quot;&lt;/strong&gt;, 3), &lt;br /&gt;            biMap);&lt;br /&gt;}&lt;/pre&gt;&lt;h4&gt;Collectors converting to Immutable Collections&lt;/h4&gt;&lt;pre&gt;@Test&lt;br /&gt;public void convertingToImmutable()&lt;br /&gt;{&lt;br /&gt;    List&amp;lt;Integer&amp;gt; source = Arrays.&lt;em&gt;asList&lt;/em&gt;(2, 1, 4, 3, 5);&lt;br /&gt;    ImmutableBag&amp;lt;Integer&amp;gt; bag = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableBag&lt;/em&gt;());&lt;br /&gt;    ImmutableSortedBag&amp;lt;Integer&amp;gt; sortedBag = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableSortedBag&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Bags.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), bag);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            SortedBags.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedBag);&lt;br /&gt;&lt;br /&gt;    ImmutableSet&amp;lt;Integer&amp;gt; set = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableSet&lt;/em&gt;());&lt;br /&gt;    ImmutableSortedSet&amp;lt;Integer&amp;gt; sortedSet = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableSortedSet&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Sets.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), set);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            SortedSets.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedSet);&lt;br /&gt;&lt;br /&gt;    ImmutableList&amp;lt;Integer&amp;gt; list = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableList&lt;/em&gt;());&lt;br /&gt;    ImmutableList&amp;lt;Integer&amp;gt; sortedList = source.stream().collect(&lt;br /&gt;            Collectors2.&lt;em&gt;toImmutableSortedList&lt;/em&gt;());&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(2, 1, 4, 3, 5), list);&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(1, 2, 3, 4, 5), sortedList);&lt;br /&gt;&lt;br /&gt;    ImmutableMap&amp;lt;String, Integer&amp;gt; map =&lt;br /&gt;            source.stream().limit(4).collect(&lt;br /&gt;                    Collectors2.&lt;em&gt;toImmutableMap&lt;/em&gt;(&lt;br /&gt;                            Object::toString, e -&amp;gt; e));&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            Maps.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(&lt;strong&gt;&quot;2&quot;&lt;/strong&gt;, 2, &lt;strong&gt;&quot;1&quot;&lt;/strong&gt;, 1, &lt;strong&gt;&quot;4&quot;&lt;/strong&gt;, 4, &lt;strong&gt;&quot;3&quot;&lt;/strong&gt;, 3),&lt;br /&gt;            map);&lt;br /&gt;&lt;br /&gt;    ImmutableBiMap&amp;lt;String, Integer&amp;gt; biMap =&lt;br /&gt;            source.stream().limit(4).collect(&lt;br /&gt;                    Collectors2.&lt;em&gt;toImmutableBiMap&lt;/em&gt;(&lt;br /&gt;                            Object::toString, e -&amp;gt; e));&lt;br /&gt;    Assert.&lt;em&gt;assertEquals&lt;/em&gt;(&lt;br /&gt;            BiMaps.&lt;strong&gt;&lt;em&gt;immutable&lt;/em&gt;&lt;/strong&gt;.with(&lt;strong&gt;&quot;2&quot;&lt;/strong&gt;, 2, &lt;strong&gt;&quot;1&quot;&lt;/strong&gt;, 1, &lt;strong&gt;&quot;4&quot;&lt;/strong&gt;, 4, &lt;strong&gt;&quot;3&quot;&lt;/strong&gt;, 3),&lt;br /&gt;            biMap);&lt;br /&gt;}&lt;/pre&gt;&lt;p&gt;The &lt;em&gt;Collector&lt;/em&gt; implementations that convert to &lt;em&gt;ImmutableCollection&lt;/em&gt; types use the &lt;em&gt;finisher&lt;/em&gt; to convert from a mutable container to an immutable container. Here is the example of the &lt;em&gt;Collector&lt;/em&gt; implementation for &lt;em&gt;toImmutableList&lt;/em&gt;().&lt;/p&gt;&lt;pre&gt;public static &amp;lt;T&amp;gt; Collector&amp;lt;T, ?, ImmutableList&amp;lt;T&amp;gt;&amp;gt; toImmutableList()&lt;br /&gt;{&lt;br /&gt;    return Collector.&amp;lt;T, MutableList&amp;lt;T&amp;gt;, ImmutableList&amp;lt;T&amp;gt;&amp;gt;&lt;em&gt;of&lt;/em&gt;(&lt;br /&gt;            Lists.&lt;strong&gt;&lt;em&gt;mutable&lt;/em&gt;&lt;/strong&gt;::empty,      &lt;strong&gt;// supplier&lt;/strong&gt;&lt;br /&gt;            MutableList::add,          &lt;strong&gt;// accumulator&lt;/strong&gt;&lt;br /&gt;            MutableList::withAll,      &lt;strong&gt;// combiner&lt;/strong&gt;&lt;br /&gt;            MutableList::toImmutable,  &lt;strong&gt;// finisher&lt;/strong&gt;&lt;br /&gt;            &lt;strong&gt;&lt;em&gt;EMPTY_CHARACTERISTICS&lt;/em&gt;&lt;/strong&gt;);    &lt;strong&gt;// characteristics&lt;/strong&gt;&lt;br /&gt;}&lt;/pre&gt;&lt;p&gt;The &lt;em&gt;finisher&lt;/em&gt; here is the &lt;em&gt;MutableList::toImmutable&lt;/em&gt; method reference. This is the final step that converts the &lt;em&gt;MutableCollection&lt;/em&gt; with the results into an &lt;em&gt;ImmutableCollection&lt;/em&gt;.&lt;/p&gt;&lt;h3&gt;Eclipse Collections API vs. Collectors2&lt;/h3&gt;&lt;p&gt;My preference is always to use the Eclipse Collections API directly if I can. If I need to operate on a JDK Collection type or if I am only given a &lt;em&gt;Stream&lt;/em&gt;, then I will use &lt;em&gt;Collectors2&lt;/em&gt;. As you can see in the examples above, Collectors2 is a natural gateway to the Eclipse Collections types and their functional, fluent, friendly and fun APIs.&lt;/p&gt;&lt;p&gt;Check out this &lt;a href=&quot;http://eclipse.github.io/eclipse-collections-kata/api-design&quot;&gt;presentation&lt;/a&gt; to learn more about the origins, design and evolution of the Eclipse Collections API.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/eclipse/eclipse-collections&quot;&gt;&lt;em&gt;Eclipse Collections&lt;/em&gt;&lt;/a&gt;&lt;em&gt; is open for &lt;/em&gt;&lt;a href=&quot;https://github.com/eclipse/eclipse-collections/blob/master/CONTRIBUTING.md&quot;&gt;&lt;em&gt;contributions&lt;/em&gt;&lt;/a&gt;&lt;em&gt;. If you like the library, you can let us know by starring it on &lt;/em&gt;&lt;a href=&quot;https://github.com/eclipse/eclipse-collections&quot;&gt;&lt;em&gt;GitHub&lt;/em&gt;&lt;/a&gt;&lt;em&gt;.&lt;/em&gt;&lt;/p&gt;&lt;img height=&quot;1&quot; src=&quot;https://medium.com/_/stat?event=post.clientViewed&amp;amp;referrerSource=full_rss&amp;amp;postId=bb5cd450d876&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Mon, 23 Jul 2018 02:26:08 +0000</pubDate>
+</item>
+<item>
+	<title>Eclipse Announcements: New Working Group and Charter at the Eclipse Foundation: OpenMobility</title>
+	<guid isPermaLink="true">http://feedproxy.google.com/~r/eclipse/fnews/~3/QcxgVMTtlXc/openmobility_charter.php</guid>
+	<link>http://feedproxy.google.com/~r/eclipse/fnews/~3/QcxgVMTtlXc/openmobility_charter.php</link>
+	<description>OpenMobility will drive the evolution and broad adoption of mobility modelling and simulation technologies.&lt;img alt=&quot;&quot; height=&quot;1&quot; src=&quot;http://feeds.feedburner.com/~r/eclipse/fnews/~4/QcxgVMTtlXc&quot; width=&quot;1&quot; /&gt;</description>
+	<pubDate>Fri, 20 Jul 2018 17:00:00 +0000</pubDate>
+</item>
+
+</channel>
+</rss>
