@@ -1,10 +1,18 @@
 package com.in28minutes.rest.webservices.usuario;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,16 +33,35 @@ public class UsuarioResource {
 	
 	
 	@GetMapping("/users/{id}")
-	public Usuario retrieveUser(@PathVariable int id) {
+	public Resource <Usuario> retrieveUser(@PathVariable int id) {
+		
 		Usuario usuario = service.findOne(id); 
+		
 		if(usuario == null) {
 			throw new UserNotFoundException("id-"+id);
 		}
-		return usuario;
+		
+		Resource<Usuario> resource = new Resource<Usuario> (usuario);
+		ControllerLinkBuilder linkTo = 
+				linkTo(methodOn(this.getClass()).retrieveAllUsers());
+		
+		resource.add(linkTo.withRel("all-users"));
+		
+		return resource;
+	}
+	
+	@DeleteMapping("/users/{id}")
+	public void deleteUser(@PathVariable int id) {
+		Usuario usuario = service.deleteById(id);
+		
+		if(usuario == null) {
+			throw new UserNotFoundException("id-" + id);
+		} 
+		
 	}
 	
 	@PostMapping("/users")
-	public ResponseEntity<Object> createUser(@RequestBody Usuario usuario) {
+	public ResponseEntity<Object> createUser(@Valid @RequestBody Usuario usuario) {
 		
 		Usuario savedUser = service.save(usuario);
 		
