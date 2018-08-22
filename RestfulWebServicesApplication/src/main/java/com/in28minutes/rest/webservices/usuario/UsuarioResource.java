@@ -5,6 +5,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -74,4 +75,7 @@ public class UsuarioResource {
 		return ResponseEntity.created(location).build();
 		
 	}
+	
+
+	
 }
